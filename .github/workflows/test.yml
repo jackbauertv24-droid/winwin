@@ -1,6 +1,9 @@
 name: Test Results
 
 on:
+  push:
+    paths:
+      - 'results/*.json'
   workflow_dispatch:
     inputs:
       result_file:
@@ -18,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,19 +34,32 @@ jobs:
           npm config set registry https://registry.npmjs.org
           npm install
 
+      - name: Detect new result file
+        id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            NEW_FILE=$(git diff --name-only --diff-filter=A HEAD^ HEAD -- 'results/*.json' | head -1)
+            MODIFIED_FILE=$(git diff --name-only HEAD^ HEAD -- 'results/*.json' | head -1)
+            FILE_TO_TEST="${NEW_FILE:-$MODIFIED_FILE}"
+            echo "file=${FILE_TO_TEST}" >> $GITHUB_OUTPUT
+            echo "Detected file: ${FILE_TO_TEST}"
+          else
+            echo "file=${{ inputs.result_file }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: List available result files
         run: |
           echo "Available result files:"
           ls -la results/marksix-*.json 2>/dev/null || echo "No result files found"
 
       - name: Run tests
+        env:
+          TEST_FILE: ${{ steps.detect.outputs.file }}
         run: |
-          if [ -n "${{ inputs.result_file }}" ]; then
-            echo "Testing specific file: ${{ inputs.result_file }}"
-            node -e "
-              const fs = require('fs');
-              const content = fs.readFileSync('results/${{ inputs.result_file }}', 'utf-8');
-              console.log('File loaded, size:', content.length, 'bytes');
-            "
+          if [ -n "$TEST_FILE" ]; then
+            echo "Testing file: $TEST_FILE"
+            node test-results.mjs "$TEST_FILE"
+          else
+            echo "Testing latest file"
+            node test-results.mjs
           fi
-          node test-results.mjs
