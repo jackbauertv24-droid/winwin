@@ -30,17 +30,17 @@ jobs:
       - name: Timestamp results
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          DATE=$(date -u +"%Y-%m-%d")
+          DATETIME=$(date -u +"%Y-%m-%d-%H%M%S")
           
           mkdir -p results
           
           if [ -f marksix-results.json ]; then
-            mv marksix-results.json "results/marksix-${DATE}.json"
+            mv marksix-results.json "results/marksix-${DATETIME}.json"
             
-            echo "{\"scrapedAt\": \"${TIMESTAMP}\", \"file\": \"marksix-${DATE}.json\"}" >> results/history.jsonl
+            echo "{\"scrapedAt\": \"${TIMESTAMP}\", \"file\": \"marksix-${DATETIME}.json\"}" >> results/history.jsonl
             
             echo "SCRAPE_TIME=${TIMESTAMP}" >> $GITHUB_ENV
-            echo "SCRAPE_DATE=${DATE}" >> $GITHUB_ENV
+            echo "SCRAPE_DATETIME=${DATETIME}" >> $GITHUB_ENV
           fi
 
       - name: Commit and push results
@@ -49,6 +49,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           
           git add results/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update Mark Six results - ${SCRAPE_DATE}"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update Mark Six results - ${SCRAPE_DATETIME}"
           
           git push
