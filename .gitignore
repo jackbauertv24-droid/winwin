@@ -2,3 +2,10 @@
 !.gitignore
 !marksix-results.json
 !fetch-marksix.mjs
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
+!results/
+!results/*
+!package.json
+!package-lock.json

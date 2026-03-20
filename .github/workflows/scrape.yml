@@ -1,0 +1,54 @@
+name: Scrape Mark Six Results
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run scraper
+        run: node fetch-marksix.mjs
+
+      - name: Timestamp results
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          DATE=$(date -u +"%Y-%m-%d")
+          
+          mkdir -p results
+          
+          if [ -f marksix-results.json ]; then
+            mv marksix-results.json "results/marksix-${DATE}.json"
+            
+            echo "{\"scrapedAt\": \"${TIMESTAMP}\", \"file\": \"marksix-${DATE}.json\"}" >> results/history.jsonl
+            
+            echo "SCRAPE_TIME=${TIMESTAMP}" >> $GITHUB_ENV
+            echo "SCRAPE_DATE=${DATE}" >> $GITHUB_ENV
+          fi
+
+      - name: Commit and push results
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add results/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update Mark Six results - ${SCRAPE_DATE}"
+          
+          git push
