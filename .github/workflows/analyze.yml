@@ -1,0 +1,153 @@
+name: Analyze Results with LLM
+
+on:
+  workflow_dispatch:
+    inputs:
+      result_file:
+        description: 'Result file to analyze (leave empty for latest)'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      result_file:
+        description: 'Result file to analyze'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect result file
+        id: detect
+        run: |
+          if [ -n "${{ inputs.result_file }}" ]; then
+            FILE="${{ inputs.result_file }}"
+            if [[ "$FILE" != results/* ]]; then
+              FILE="results/$FILE"
+            fi
+          else
+            FILE=$(ls -t results/marksix-*.json 2>/dev/null | head -1)
+          fi
+          
+          if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
+            echo "No result file found"
+            exit 1
+          fi
+          
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "Analyzing: $FILE"
+
+      - name: Prepare prompt and call LLM
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_ENDPOINT_URL: ${{ secrets.LLM_ENDPOINT_URL }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+        run: |
+          DATA=$(cat ${{ steps.detect.outputs.file }})
+          
+          PROMPT="Analyze the following Mark Six lottery historical data and provide a comprehensive report in Markdown format.
+
+The data contains lottery draw results with drawId, date, mainNumbers (6 numbers), and extraNumber.
+
+Data:
+\`\`\`json
+$DATA
+\`\`\`
+
+Please include the following sections:
+
+## 1. Number Frequency Analysis
+- List the most frequently drawn numbers (top 10)
+- List the least frequently drawn numbers (bottom 10)
+- Include frequency counts
+
+## 2. Hot and Cold Numbers
+- Hot numbers: Numbers drawn more frequently in recent draws
+- Cold numbers: Numbers that haven't appeared recently
+- Define based on the available data
+
+## 3. Consecutive Number Patterns
+- Frequency of consecutive numbers appearing together
+- Examples of consecutive pairs/triples found
+
+## 4. Odd/Even Distribution
+- Analyze the balance of odd vs even numbers across draws
+- Identify any trends
+
+## 5. Sum Range Analysis
+- Calculate and analyze the sum of main numbers for each draw
+- Identify typical sum ranges
+
+## 6. Extra Number Analysis
+- Frequency distribution of extra numbers
+- Any patterns observed
+
+## 7. Statistical Observations
+- Any interesting patterns or anomalies
+- Note: These are statistical observations only, not predictions or guarantees
+
+Format all sections clearly in Markdown with proper headers and bullet points."
+
+          PROMPT_JSON=$(echo "$PROMPT" | jq -Rs .)
+          
+          echo "Calling LLM API..."
+          
+          RESPONSE=$(curl -s -X POST "$LLM_ENDPOINT_URL" \
+            -H "Authorization: Bearer $LLM_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"model\": \"$LLM_MODEL\",
+              \"messages\": [{\"role\": \"user\", \"content\": $PROMPT_JSON}],
+              \"temperature\": 0.7,
+              \"max_tokens\": 4096
+            }")
+          
+          CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+          
+          if [ -z "$CONTENT" ] || [ "$CONTENT" = "null" ]; then
+            echo "Error: Failed to get response from LLM"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+          
+          echo "$CONTENT" > /tmp/analysis.md
+          echo "Analysis generated successfully"
+
+      - name: Save analysis report
+        run: |
+          mkdir -p analysis
+          DATETIME=$(date -u +"%Y-%m-%d-%H%M%S")
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SOURCE_FILE=$(basename ${{ steps.detect.outputs.file }} .json)
+          
+          {
+            echo "# Mark Six Lottery Analysis"
+            echo ""
+            echo "**Generated:** ${TIMESTAMP}"
+            echo "**Source:** ${{ steps.detect.outputs.file }}"
+            echo ""
+            cat /tmp/analysis.md
+          } > "analysis/marksix-analysis-${DATETIME}.md"
+          
+          echo "ANALYSIS_DATETIME=${DATETIME}" >> $GITHUB_ENV
+          echo "ANALYSIS_FILE=analysis/marksix-analysis-${DATETIME}.md" >> $GITHUB_ENV
+          echo "Saved: analysis/marksix-analysis-${DATETIME}.md"
+
+      - name: Commit and push analysis
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add analysis/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Add LLM analysis - ${ANALYSIS_DATETIME}"
+          
+          git push
+          echo "Analysis committed and pushed"

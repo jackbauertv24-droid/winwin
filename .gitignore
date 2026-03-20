@@ -7,5 +7,7 @@
 !.github/workflows/*.yml
 !results/
 !results/*
+!analysis/
+!analysis/*
 !package.json
 *.md
