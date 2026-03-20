@@ -1,6 +1,5 @@
 *
 !.gitignore
-!README.md
 !fetch-marksix.mjs
 !.github/
 !.github/workflows/
@@ -8,3 +7,4 @@
 !results/
 !results/*
 !package.json
+*.md
