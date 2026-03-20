@@ -138,5 +138,145 @@
       23
     ],
     "extraNumber": 12
+  },
+  {
+    "drawId": "26/020 CNY",
+    "date": "21/02/2026",
+    "sbName": "Year of the Horse Snowball",
+    "mainNumbers": [
+      2,
+      18,
+      34,
+      35,
+      37,
+      49
+    ],
+    "extraNumber": 33
+  },
+  {
+    "drawId": "26/019",
+    "date": "15/02/2026",
+    "sbName": "",
+    "mainNumbers": [
+      8,
+      28,
+      33,
+      36,
+      37,
+      46
+    ],
+    "extraNumber": 4
+  },
+  {
+    "drawId": "26/018",
+    "date": "12/02/2026",
+    "sbName": "",
+    "mainNumbers": [
+      2,
+      3,
+      14,
+      25,
+      37,
+      46
+    ],
+    "extraNumber": 10
+  },
+  {
+    "drawId": "26/017",
+    "date": "10/02/2026",
+    "sbName": "",
+    "mainNumbers": [
+      3,
+      4,
+      14,
+      18,
+      26,
+      39
+    ],
+    "extraNumber": 40
+  },
+  {
+    "drawId": "26/016",
+    "date": "07/02/2026",
+    "sbName": "",
+    "mainNumbers": [
+      12,
+      22,
+      28,
+      32,
+      37,
+      44
+    ],
+    "extraNumber": 20
+  },
+  {
+    "drawId": "26/015",
+    "date": "05/02/2026",
+    "sbName": "",
+    "mainNumbers": [
+      1,
+      9,
+      17,
+      24,
+      35,
+      36
+    ],
+    "extraNumber": 42
+  },
+  {
+    "drawId": "26/014",
+    "date": "03/02/2026",
+    "sbName": "",
+    "mainNumbers": [
+      12,
+      23,
+      27,
+      37,
+      39,
+      42
+    ],
+    "extraNumber": 5
+  },
+  {
+    "drawId": "26/013",
+    "date": "31/01/2026",
+    "sbName": "",
+    "mainNumbers": [
+      25,
+      30,
+      32,
+      35,
+      36,
+      47
+    ],
+    "extraNumber": 46
+  },
+  {
+    "drawId": "26/012",
+    "date": "29/01/2026",
+    "sbName": "",
+    "mainNumbers": [
+      6,
+      9,
+      12,
+      14,
+      35,
+      44
+    ],
+    "extraNumber": 11
+  },
+  {
+    "drawId": "26/011",
+    "date": "27/01/2026",
+    "sbName": "",
+    "mainNumbers": [
+      7,
+      12,
+      14,
+      25,
+      38,
+      47
+    ],
+    "extraNumber": 15
   }
 ]

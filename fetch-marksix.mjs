@@ -47,6 +47,56 @@ async function fetchMarkSix() {
     const title = await page.title();
     console.log('Page title:', title);
 
+    console.log('\nSetting Draw Number to 30...');
+    
+    const drawNumberRadio = await page.$('input[type="radio"].invCalFlexiBet-betline');
+    if (drawNumberRadio) {
+      const isChecked = await drawNumberRadio.isChecked();
+      if (!isChecked) {
+        await drawNumberRadio.click({ force: true });
+        console.log('Selected Draw Number radio');
+      }
+    }
+
+    await page.waitForTimeout(500);
+
+    const dropdownButton = await page.$('.draw-number-dropdown-button button');
+    if (dropdownButton) {
+      await dropdownButton.click({ force: true });
+      console.log('Clicked dropdown to open');
+      await page.waitForTimeout(1000);
+    }
+
+    const option30 = await page.$('text="30"');
+    if (option30) {
+      await option30.click({ force: true });
+      console.log('Selected option 30');
+      await page.waitForTimeout(500);
+    } else {
+      console.log('Option 30 not found directly, trying alternative...');
+      const dropdownItems = await page.$$('.dropdown-item, [role="option"]');
+      for (const item of dropdownItems) {
+        const text = await item.textContent();
+        if (text?.trim() === '30') {
+          await item.click({ force: true });
+          console.log('Selected 30 from dropdown items');
+          break;
+        }
+      }
+    }
+
+    await page.waitForTimeout(500);
+
+    const searchButton = await page.$('.search-btn');
+    if (searchButton) {
+      await searchButton.click({ force: true });
+      console.log('Clicked Search button');
+      await page.waitForTimeout(3000);
+    }
+
+    console.log('Waiting for results to load...');
+    await page.waitForSelector('.table-row', { timeout: 15000 });
+
     const results = await page.evaluate(() => {
       const rows = document.querySelectorAll('.table-row');
       const draws = [];
