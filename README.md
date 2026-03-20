@@ -13,6 +13,7 @@ This project involves GitHub repository setup and web scraping of Hong Kong Jock
 | 1.0.0 | `v1.0.0` | 2026-03-20 | Initial scraper - 10 draws |
 | 1.1.0 | `v1.1.0` | 2026-03-20 | Added Draw Number=30 option - 30 draws |
 | 1.2.0 | `v1.2.0` | 2026-03-20 | GitHub Actions automation with timestamped results |
+| 1.2.1 | `v1.2.1` | 2026-03-20 | Documentation and README update |
 
 ---
 
