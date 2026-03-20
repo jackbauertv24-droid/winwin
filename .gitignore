@@ -1,6 +1,5 @@
 *
 !.gitignore
-!marksix-results.json
 !fetch-marksix.mjs
 !.github/
 !.github/workflows/
@@ -8,4 +7,3 @@
 !results/
 !results/*
 !package.json
-!package-lock.json
