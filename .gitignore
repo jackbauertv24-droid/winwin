@@ -11,3 +11,4 @@
 !analysis/*
 !package.json
 *.md
+!analysis/*.md
