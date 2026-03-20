@@ -53,50 +53,29 @@ jobs:
         run: |
           DATA=$(cat ${{ steps.detect.outputs.file }})
           
-          PROMPT="Analyze the following Mark Six lottery historical data and provide a comprehensive report in Markdown format.
+          cat > /tmp/prompt.txt << 'PROMPT_EOF'
+          Analyze the following Mark Six lottery historical data and provide a comprehensive report in Markdown format.
 
-The data contains lottery draw results with drawId, date, mainNumbers (6 numbers), and extraNumber.
+          The data contains lottery draw results with drawId, date, mainNumbers (6 numbers), and extraNumber.
 
-Data:
-\`\`\`json
-$DATA
-\`\`\`
+          Please include the following sections:
 
-Please include the following sections:
+          1. Number Frequency Analysis - List the most and least frequently drawn numbers with counts
+          2. Hot and Cold Numbers - Numbers drawn frequently vs rarely in recent draws
+          3. Consecutive Number Patterns - Frequency of consecutive numbers appearing together
+          4. Odd/Even Distribution - Balance of odd vs even numbers across draws
+          5. Sum Range Analysis - Typical sum ranges for main numbers
+          6. Extra Number Analysis - Frequency distribution of extra numbers
+          7. Statistical Observations - Any interesting patterns or anomalies (not predictions)
 
-## 1. Number Frequency Analysis
-- List the most frequently drawn numbers (top 10)
-- List the least frequently drawn numbers (bottom 10)
-- Include frequency counts
+          Format all sections clearly in Markdown with proper headers and bullet points.
 
-## 2. Hot and Cold Numbers
-- Hot numbers: Numbers drawn more frequently in recent draws
-- Cold numbers: Numbers that haven't appeared recently
-- Define based on the available data
-
-## 3. Consecutive Number Patterns
-- Frequency of consecutive numbers appearing together
-- Examples of consecutive pairs/triples found
-
-## 4. Odd/Even Distribution
-- Analyze the balance of odd vs even numbers across draws
-- Identify any trends
-
-## 5. Sum Range Analysis
-- Calculate and analyze the sum of main numbers for each draw
-- Identify typical sum ranges
-
-## 6. Extra Number Analysis
-- Frequency distribution of extra numbers
-- Any patterns observed
-
-## 7. Statistical Observations
-- Any interesting patterns or anomalies
-- Note: These are statistical observations only, not predictions or guarantees
-
-Format all sections clearly in Markdown with proper headers and bullet points."
-
-          PROMPT_JSON=$(echo "$PROMPT" | jq -Rs .)
+          Data:
+          PROMPT_EOF
+          
+          echo "$DATA" >> /tmp/prompt.txt
+          
+          PROMPT_JSON=$(cat /tmp/prompt.txt | jq -Rs .)
           
           echo "Calling LLM API..."
           
