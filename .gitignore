@@ -1,3 +1,4 @@
 *
 !.gitignore
 !marksix-results.json
+!fetch-marksix.mjs
