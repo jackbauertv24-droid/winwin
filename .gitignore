@@ -1,6 +1,7 @@
 *
 !.gitignore
 !fetch-marksix.mjs
+!test-results.mjs
 !.github/
 !.github/workflows/
 !.github/workflows/*.yml

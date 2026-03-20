@@ -1,0 +1,47 @@
+name: Test Results
+
+on:
+  workflow_dispatch:
+    inputs:
+      result_file:
+        description: 'Result file to test (leave empty for latest)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          npm config set registry https://registry.npmjs.org
+          npm install
+
+      - name: List available result files
+        run: |
+          echo "Available result files:"
+          ls -la results/marksix-*.json 2>/dev/null || echo "No result files found"
+
+      - name: Run tests
+        run: |
+          if [ -n "${{ inputs.result_file }}" ]; then
+            echo "Testing specific file: ${{ inputs.result_file }}"
+            node -e "
+              const fs = require('fs');
+              const content = fs.readFileSync('results/${{ inputs.result_file }}', 'utf-8');
+              console.log('File loaded, size:', content.length, 'bytes');
+            "
+          fi
+          node test-results.mjs
