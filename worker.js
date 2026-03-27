@@ -6,8 +6,20 @@ export default {
     });
     const files = await listResponse.json();
     
-    const mdFiles = files.filter(f => f.name.endsWith('.md'));
+    if (!Array.isArray(files)) {
+      return new Response(`Error: ${files.message || 'Failed to fetch files'}`, {
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
+    
+    const mdFiles = files.filter(f => f.name && f.name.endsWith('.md'));
     const latestMd = mdFiles.sort((a, b) => b.name.localeCompare(a.name))[0];
+    
+    if (!latestMd) {
+      return new Response('Error: No MD files found', {
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
     
     const contentResponse = await fetch(latestMd.download_url);
     const mdContent = await contentResponse.text();
